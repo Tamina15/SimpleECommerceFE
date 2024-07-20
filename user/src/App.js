@@ -3,6 +3,7 @@ import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { appRoutes } from "./routes";
 import { default as Navbar } from './components/Navbar';
 import Login from "./components/Login";
+import Register from "./components/Register";
 import WithoutNav from "./components/WithoutNav";
 import WithNav from "./components/WithNav";
 const App = () => {
@@ -29,6 +30,14 @@ const App = () => {
         token={token}
         baseUrl={'http://localhost:8080/api/v1/'} />}>
         <Route path="/login" element={<Login loggedIn={loggedIn}
+          setLoggedIn={setLoggedIn}
+          setEmail={setEmail}
+          email={email}
+          user={user}
+          setUser={setUser}
+          token={token}
+          baseUrl={'http://localhost:8080/api/v1/'} />} />
+                  <Route path="/register" element={<Register loggedIn={loggedIn}
           setLoggedIn={setLoggedIn}
           setEmail={setEmail}
           email={email}

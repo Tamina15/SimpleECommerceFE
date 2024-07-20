@@ -4,11 +4,13 @@ import { useEffect, useState } from "react";
 function App(props) {
     const { changePage, total } = props;
     const [current, setCurrent] = useState(1);
+    
     const onChange = (page, pageSize) => {
         console.log(page, pageSize);
         setCurrent(page);
         changePage(page, pageSize);
     };
+
     const onShowSizeChange = (current, pageSize) => {
         console.log(current, pageSize);
     };
