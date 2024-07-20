@@ -16,7 +16,7 @@ const Products = (props) => {
     const [categoryId, setCategoryId] = useState('');
     const [total, setTotal] = useState(0);
     const [error, setError] = useState(false);
-const [loading, setLoading] = useState(true);
+    const [loading, setLoading] = useState(true);
     // addParam true to append to the query, false to start new param query
     const getProducts = async (url, addParam = true) => {
         if (addParam) {
@@ -29,6 +29,16 @@ const [loading, setLoading] = useState(true);
         const response = await fetch(url);
         let data = await response.json();
         console.log(data);
+        data.products.map((product, index) => {
+            let array = product.description.split(":");
+            let d = "";
+            for (let i = 0; i < array.length; i++) {
+                d = d + array[i] + ': ' + array[i + 1] + "\n"; i++
+            }
+            console.log(d)
+            product.description = d;
+        })
+        console.log(products);
         setProducts(data.products);
         setTotal(data.count);
         setLoading(false);
@@ -56,6 +66,8 @@ const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         getProducts(baseUrl + 'products').catch((e) => { console.error(e); setError(true); });
+
+        // setProducts([...products]);
         getCategories(baseUrl + "categories").catch((e) => { console.error(e); });
     }, []);
 
@@ -80,14 +92,12 @@ const [loading, setLoading] = useState(true);
             console.log("cart ", cart);
             cart = localStorage.setItem("cart", cart);
         }
-
-
-
     }
+
     return (
         <>
             <Container fluid='sm' className='mt-4 justify-content-center'>
-          {loading ? <h3>Loading ...</h3>:""} 
+                {loading ? <h3>Loading ...</h3> : ""}
                 <Form onSubmit={(e) => { applyCategory(e); }}>
                     <Row>
                         <Col sm={2} md={2} xxl={2}>
@@ -108,14 +118,19 @@ const [loading, setLoading] = useState(true);
             </Container>
             <Container fluid="xl" className='m-4 justify-content-center'>
                 <Row xs={'auto'} sm={'auto'} md={'auto'} lg={'auto'} className="g-4">
+
                     {products && products.map((product, index) => (
-                        <Col key={product.id}>
+                        <Col key={product.id} >
                             <Card style={{ width: '18rem' }}>
+
                                 <Card.Img variant="top" src={product.image.length > 0 && product.image[0].url} />
                                 <Card.Body>
                                     <Card.Title>{product.name} {product.feature ? <StarTwoTone twoToneColor="#ffff00" /> : ""}</Card.Title>
-                                    <Card.Text>
-                                        {product.description}
+                                    <Card.Text style={{"maxHeight":"200px", overflow:"auto", overflowY:"scroll"}}>
+                                        {product.description.split("\n").map(p => (
+                                            <p>{p}</p>
+                                        )
+                                        )}
                                     </Card.Text>
                                     <Row>
                                         <Col>
@@ -133,7 +148,7 @@ const [loading, setLoading] = useState(true);
                 <Row className='mt-4 justify-content-center'>
                     <Pagination changePage={changePage} total={total}></Pagination>
                 </Row>
-            </Container>
+            </Container >
         </>
     );
 };

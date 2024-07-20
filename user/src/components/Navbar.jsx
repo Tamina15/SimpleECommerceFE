@@ -17,12 +17,12 @@ function App() {
                         <Nav className="me-auto">
                             <Nav.Link as={Link} to={'/products'}>Products</Nav.Link>
                             <Nav.Link as={Link} to={'/profile'}>Profile</Nav.Link>
-                            <Nav.Link as={Link} to={'/orders'}>Orders</Nav.Link>
+                            {/* <Nav.Link as={Link} to={'/orders'}>Orders</Nav.Link> */}
                         </Nav>
                     </Navbar.Collapse>
                 </Container>
                 <Container>
-                    <Form inline="true">
+                    {/* <Form inline="true">
                         <Row>
                             <Col xs="auto" md={8}>
                                 <Form.Control
@@ -35,7 +35,7 @@ function App() {
                                 <Button type="submit" variant="outline-success">Submit</Button>
                             </Col>
                         </Row>
-                    </Form>
+                    </Form> */}
                 </Container>
                 <Container className='pe-5 gx-5 justify-content-end'>
                 <Button className='mx-4' variant='outline-dark' as={Link} to={'/cart'}>
@@ -51,11 +51,9 @@ function App() {
                         : <>
                             <Row className='flex-row gx-5 justify-content-end'>
                                 <Col>
-
                                     <Button as={Link} to={'/login'} property=''>Login</Button>
                                 </Col>
                                 <Col>
-
                                     <Button as={Link} to={'/register'}>Register</Button>
                                 </Col>
                             </Row>

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Button, Card, Col, Container, Row } from "react-bootstrap";
+import { Button, Card, Col, Container, Row, Spinner } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
 import { PlusCircleOutlined, MinusCircleOutlined } from '@ant-design/icons';
 import { message, Space } from 'antd';
@@ -14,7 +14,7 @@ function Cart(props) {
     const [cartMap, setCartMap] = useState({ map: new Map() });
 
     const [products, setProducts] = useState([]);
-    const [nullCart, setNullCart] = useState(localStorage.getItem("cart") === null);
+    const [nullCart, setNullCart] = useState(localStorage.getItem("cart") === null || localStorage.getItem("cart").length === 0);
     const [messageApi, contextHolder] = message.useMessage();
 
     const navigate = useNavigate();
@@ -26,7 +26,7 @@ function Cart(props) {
 
     function parseCart() {
         let c = localStorage.getItem("cart");
-        if (c === null) {
+        if (c === null || c.length === 0) {
             return
         }
         let map = new Map();
@@ -127,34 +127,73 @@ function Cart(props) {
         const map = cartMap.map;
         let product_array = [];
         map.forEach((value, key) => { if (Number(value) > 0) product_array.push({ product_id: Number(key), amount: Number(value) }) })
-        const body = {
-            "products": product_array
-        };
-        console.log(body);
-
-        // const result = await fetch(baseUrl + 'orders/', {
-        //     method: "POST",
-        //     headers: {
-        //         'Content-Type': 'application/json',
-        //         "Authorization": "Bearer " + token,
-        //     },
-        //     body: JSON.stringify(body)
-        // }).then(async r => { console.log(await r.json()); setBuying(false) }).catch(e => { console.log(e); window.alert("Fail to register"); navigate('/error') })
+        const body = { products: product_array };
+        if (product_array.length == 0) { setLoading(false); return window.alert("Your Cart Is Empty"); }
+        const result = await fetch(baseUrl + 'orders/', {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+                "Authorization": "Bearer " + token,
+            },
+            body: JSON.stringify(body)
+        }).then(async response => {
+            const data = await response.json();
+            if (response.status >= 500) { setError(true); window.alert("Error", JSON.parse(data).message) }
+            if (response.status === 401 || response.status === 403) { window.alert("Forbidden"); navigate('/login') }
+            if (response.status === 409) { setError(true); window.alert("409"); }
+            if (response.status === 200) {
+                window.alert("Order Created");
+                console.log(data)
+                let p = data.products
+                let map = cartMap.map;
+                p.forEach(e => {
+                    console.log(e);
+                    map.delete(e.product_id);
+                })
+                setCartMap(c => ({ ...c, map: map }));
+                let newProducts = products.filter(item => map.has(item.id));
+                setProducts([...newProducts]);
+                if (products.length == 0) {
+                    localStorage.removeItem("cart");
+                    setNullCart(true);
+                    return;
+                }
+                let resultArray = Array.from(map, ([key, value]) => { return Number(key).toString() + ":" + value })
+                let resultString = resultArray.join().trim();
+                if(resultString.length === 0){
+                    setNullCart(true);
+                    return;
+                }
+                console.log(resultString);
+                localStorage.setItem("cart", resultString);
+            }
+        }).catch(e => { setLoading(false); setError(true); console.log(e); window.alert("Error: " + e); })
+        setLoading(false)
     }
 
 
 
     if (nullCart) {
         return <>
-            <Container className=" mt-5 d-flex justify-content-center">
-                <h3> Your Cart Is Empty</h3>
-                <Link to={'/products'}>Continue Buying</Link>
+            <Container className=" mt-5">
+                <Container className="d-flex justify-content-center mb-3">
+                    <h3> Your Cart Is Empty.</h3>
+                </Container>
+                <Container className="d-flex justify-content-center">
+                    <Link to={'/products'}>Continue Buying</Link>
+                </Container>
             </Container>
         </>
     }
     return (<>
         <Container fluid="xl" className='m-4 justify-content-center'>
-            <Button variant="success" className="my-5" size="lg" onClick={e => { Buy() }}>Buy Now</Button>
+            <Button variant="success" className="my-5" size="lg" disabled={loading} onClick={e => { Buy() }}>{loading ? <Spinner
+                as="span"
+                animation="border"
+                size="sm"
+                role="status"
+                aria-hidden="true"
+            /> : "Buy Now"}</Button>
             <Row xs={'auto'} sm={'auto'} md={'auto'} lg={'auto'} className="g-4">
                 {products && products.map((product, index) => (
 
@@ -196,6 +235,7 @@ function Cart(props) {
                 ))}
             </Row>
         </Container>
+
     </>);
 }
 

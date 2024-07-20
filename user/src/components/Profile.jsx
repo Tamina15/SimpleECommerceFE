@@ -40,7 +40,8 @@ function Profile(props) {
         setUser(n => ({ ...n, [name]: e.target.value }))
     }
     function changeInfo(e) {
-
+        e.preventDefault();
+        window.alert("Not Implement")
     }
 
     return (<Container className="m-5">
@@ -133,7 +134,7 @@ function Profile(props) {
                                 <Form.Control type="text" defaultValue={user.lastname} onChange={(e) => { { setUserField('lasname', e); } }} />
                             </Form.Group>
                         </Row>
-                        <Button>Change Info</Button>
+                        <Button type="submit">Change Info</Button>
                     </Form>
                 </Container>
             </Col>

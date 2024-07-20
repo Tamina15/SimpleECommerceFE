@@ -145,8 +145,8 @@ function Products(props) {
                             <td> {product.rating}</td>
                             <td> {JSON.stringify((product.category.map(c => { return (c.id); })))}</td>
                             <td> {product.feature ? "True" : "False"}</td>
-                            <td> {product.created_at}</td>
-                            <td> {product.updated_at}</td>
+                            <td> {new Date(product.created_at).toLocaleString()}</td>
+                            <td> {new Date(product.updated_at).toLocaleString()}</td>
                             {/* <td> {product.image.map(i => { return (<><Link to={i.url}>{i.url}</Link> <br /></>); })}</td> */}
                             <td style={{ width: "100px" }}><Container className="justify-content-center d-flex flex-column">
                                 <Button className="m-3 btn-warning" key={"edit_" + product.id} as={Link} to={"/products/" + product.id}>Edit</Button>

@@ -26,6 +26,13 @@ function ProductDetail(props) {
     const getProduct = async () => {
         const response = await fetch(baseUrl + 'products/' + productId);
         let data = await response.json();
+        // let array = data.description.split(":");
+        // let d = "";
+        // for (let i = 0; i < array.length; i++) {
+        //     d = d + array[i] + ': ' + array[i + 1] + "\n"; i++
+        // }
+        // console.log(d)
+        // data.description = d;
         setProduct(data);
         return response.data;
     };
@@ -34,31 +41,31 @@ function ProductDetail(props) {
         getProduct().catch((e) => { console.error(e); navigate('/error') });
     }, []);
 
-    async function Buy(e) {
-        e.preventDefault();
-        setBuying(true);
-        if (!loggedIn) {
-            return navigate('/login');
-        }
+    // async function Buy(e) {
+    //     e.preventDefault();
+    //     setBuying(true);
+    //     if (!loggedIn) {
+    //         return navigate('/login');
+    //     }
 
-        const body = { products: [{ product_id: parseInt(productId), amount: buyAmount }] };
-        console.log(body);
-        let token = JSON.parse(sessionStorage.getItem('user')).token;
+    //     const body = { products: [{ product_id: parseInt(productId), amount: buyAmount }] };
+    //     let token = JSON.parse(sessionStorage.getItem('user')).token;
 
-        const result = await fetch(baseUrl + 'orders/', {
-            method: "POST",
-            headers: {
-                'Content-Type': 'application/json',
-                "Authorization": "Bearer " + token,
-            },
-            body: JSON.stringify(body)
-        }).then(async r => { console.log(await r.json()); setBuying(false) }).catch(e => { console.log(e); window.alert("Fail to register"); navigate('/error') })
-    }
+    //     const result = await fetch(baseUrl + 'orders/', {
+    //         method: "POST",
+    //         headers: {
+    //             'Content-Type': 'application/json',
+    //             "Authorization": "Bearer " + token,
+    //         },
+    //         body: JSON.stringify(body)
+    //     }).then(async r => { console.log(await r.json()); setBuying(false) }).catch(e => { console.log(e); window.alert("Fail to register"); navigate('/error') })
+    // }
 
     async function SubmitRating(e) {
         if (!loggedIn) {
             return navigate('/login');
         }
+        if (rating === 0) return window.alert("Rate Cannot be Zero")
         let product_id = parseInt(productId)
         let body = JSON.stringify({ product_id, rating });
         let token = JSON.parse(sessionStorage.getItem('user')).token;
@@ -84,6 +91,19 @@ function ProductDetail(props) {
 
     }
 
+    function addToCart(e) {
+        const product_id = e.target.value;
+        const amount = 1;
+        let cart = localStorage.getItem("cart")
+        if (cart === null) {
+            cart = localStorage.setItem("cart", product_id + ":" + amount);
+        } else {
+            cart = cart + "," + product_id + ":" + amount;
+            console.log("cart ", cart);
+            cart = localStorage.setItem("cart", cart);
+        }
+    }
+
     return (
         <>
             <Container className="mt-5">
@@ -104,7 +124,7 @@ function ProductDetail(props) {
                     <Col xs={2} sm={3} md={3} className="d-flex justify-content-center">
                         <Figure className="justify-content-center">
 
-                            <Image 
+                            <Image
                                 width={'auto'}
                                 src={product.image && product.image.length > 0 && product.image[0].url}
                             />
@@ -126,10 +146,9 @@ function ProductDetail(props) {
                             <Card.Header>{product.name}</Card.Header>
                             <Card.Body>
                                 <Card.Title>{Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(product.price)}</Card.Title>
-                                <Card.Text>
-                                    {product.description}
-                                </Card.Text>
-                                <Form className="row align-items-center" onSubmit={(e) => Buy(e)}>
+                                <Card.Text style={{ "maxHeight": "200px", overflow: "auto", overflowY: "scroll" }}>
+                                    {product.description}                                    </Card.Text>
+                                {/* <Form className="row align-items-center" onSubmit={(e) => Buy(e)}>
                                     <Row className="justify-content-center">
                                         <Col className="col-2">
                                             <Form.Control type="number" max={product.amount} min="1" defaultValue={1} onChange={(e) => setBuyAmount(e.target.value)}></Form.Control>
@@ -138,7 +157,10 @@ function ProductDetail(props) {
                                             <Button variant="primary" type="submit" disabled={buying ? true : false}>{buying ? <LoadingOutlined /> : "Buy now"}</Button>
                                         </Col>
                                     </Row>
-                                </Form>
+                                </Form> */}
+                                <Col>
+                                    <Button variant="primary" value={product.id} onClick={(e) => { addToCart(e) }}>Add To Cart</Button>
+                                </Col>
                             </Card.Body>
                             <Card.Footer className="text-muted">{product.amount} in stock</Card.Footer>
                         </Card>
